@@ -6,7 +6,7 @@ const ingredientsController = require('../server/controllers').ingredientsContro
 router.post('/', ingredientsController.create)
 router.get('/', ingredientsController.readAll)
 router.get('/:id', ingredientsController.readOne)
-router.put('/:id', ingredientsController.update)
+router.patch('/:id', ingredientsController.update)
 router.delete('/:id', ingredientsController.destroy)
 
 module.exports = router;

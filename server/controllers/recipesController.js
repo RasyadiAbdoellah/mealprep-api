@@ -2,12 +2,13 @@ const Recipe = require('../models').Recipe
 
 module.exports = {
   create(req, res) {
+    
+    const data = req.body.recipe
+    if(data.day < 1 || data.day >31) {
+      data.day = null
+    }
     return Recipe
-      .create({
-        name: req.body.name,
-        details: req.body.details,
-        day: (req.body.day && req.body.day <=31 && req.body.day >= 1) ? req.body.day : null
-      })
+      .create(data)
       .then(recipe => res.status(201).send(recipe))
       .catch(error => res.status(400).send(error))
   },
@@ -34,15 +35,18 @@ module.exports = {
   },
 
   update(req, res){
+    
+    const data = req.body.recipe
+
+    if(data.day && (data.day < 1 || data.day >31)) {
+      data.day = null
+    }
+    
     return Recipe
     .findById(req.params.id)
     .then(recipe => {
       if(recipe){
-        recipe.update({
-          name: req.body.name,
-          details: req.body.details,
-          day: (req.body.day <=31 && req.body.day >= 1) ? req.body.day : null
-        })
+        recipe.update(data)
         .then(recipe => res.status(201).send(recipe))
         .catch(error => res.status(400).send(error))
       }else{

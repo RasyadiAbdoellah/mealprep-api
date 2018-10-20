@@ -3,9 +3,7 @@ const Ingredient = require('../models').Ingredient
 module.exports = {
   create(req, res) {
     return Ingredient
-      .create({
-        name: req.body.name
-      })
+      .create(req.body.ingredient)
       .then(ingredient => res.status(201).send(ingredient))
       .catch(error => res.status(400).send(error))
   },
@@ -36,9 +34,7 @@ module.exports = {
     .findById(req.params.id)
     .then(ingredient => {
       if(ingredient){
-        ingredient.update({
-          name: req.body.name
-        })
+        ingredient.update(req.body.ingredient)
         .then(ingredient => res.status(201).send(ingredient))
         .catch(error => res.status(400).send(error))
       }else{
