@@ -28,7 +28,7 @@ module.exports = {
         res.status(200).send(recipe)
       }
       else {
-        res.status(400).send('no recipe found')
+        throw new Error('no recipe found')
       }
     })
     .catch(error => res.status(400).send(error))
@@ -46,13 +46,12 @@ module.exports = {
     .findById(req.params.id)
     .then(recipe => {
       if(recipe){
-        recipe.update(data)
-        .then(recipe => res.status(201).send(recipe))
-        .catch(error => res.status(400).send(error))
+       return recipe.update(data)
       }else{
-        res.status(400).send('no recipe found')
+        throw new Error('invalid recipe ID')
       }
     })
+    .then(recipe => res.status(201).send(recipe))
     .catch(error => res.status(400).send(error))
   },
 

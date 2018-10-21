@@ -23,7 +23,7 @@ module.exports = {
         res.status(200).send(ingredient)
       }
       else {
-        res.status(400).send('no ingredient found')
+        throw new Error('no ingredient found')
       }
     })
     .catch(error => res.status(400).send(error))
@@ -34,13 +34,12 @@ module.exports = {
     .findById(req.params.id)
     .then(ingredient => {
       if(ingredient){
-        ingredient.update(req.body.ingredient)
-        .then(ingredient => res.status(201).send(ingredient))
-        .catch(error => res.status(400).send(error))
+        return ingredient.update(req.body.ingredient)
       }else{
-        res.status(400).send('no ingredient found')
+        throw new Error('invalid ingredient ID')
       }
     })
+    .then(ingredient => res.status(201).send(ingredient))
     .catch(error => res.status(400).send(error))
   },
 

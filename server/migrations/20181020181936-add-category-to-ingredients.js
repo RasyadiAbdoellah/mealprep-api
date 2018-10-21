@@ -12,7 +12,11 @@ module.exports = {
    return queryInterface.addColumn(
      'Ingredients',
      'category',
-     Sequelize.STRING
+     {
+      type: Sequelize.ENUM,
+      defaultValue: 'other',
+      values: ['carbs', 'fruit', 'veg', 'dairy', 'protein', 'seasoning & garnishes', 'other']
+    }
    )
   },
 
@@ -24,5 +28,9 @@ module.exports = {
       Example:
       return queryInterface.dropTable('users');
     */
+    return queryInterface.removeColumn(
+      'Ingredients',
+      'category'
+    )
   }
 };

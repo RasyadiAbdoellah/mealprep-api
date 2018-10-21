@@ -6,11 +6,9 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     category: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM,
       defaultValue: 'other',
-      validate: {
-        isIn: [['carbs', 'fruit', 'veg', 'dairy', 'protein', 'seasoning & garnishes', 'other']]
-      }
+      values: ['carbs', 'fruit', 'veg', 'dairy', 'protein', 'seasoning & garnishes', 'other']
     }
   }, {});
   Ingredient.associate = function(models) {
