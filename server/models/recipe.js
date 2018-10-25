@@ -6,7 +6,30 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     details: DataTypes.STRING,
-    day: DataTypes.BIGINT
+    day: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      validate: {
+        min: 0,
+        max: 7
+      }
+    },
+    week: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      validate: {
+        min: 0,
+        max: 4
+      }
+    },
+    month: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      validate: {
+        min: 0,
+        max: 12
+      }
+    },
   }, {});
   Recipe.associate = function(models) {
     // associations can be defined here

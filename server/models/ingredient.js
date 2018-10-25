@@ -5,10 +5,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    category: {
+    typeOf: {
       type: DataTypes.ENUM,
-      defaultValue: 'other',
-      values: ['carbs', 'fruit', 'veg', 'dairy', 'protein', 'seasoning & garnishes', 'other']
+      defaultValue: 'uncategorized',
+      values: ['carbs', 'fruit', 'veg', 'dairy', 'protein', 'seasoning & garnishes', 'other', 'uncategorized']
     }
   }, {});
   Ingredient.associate = function(models) {
