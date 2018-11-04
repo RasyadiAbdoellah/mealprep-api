@@ -9,8 +9,7 @@ async function asyncForEach(array, callback) {
 
 module.exports = {
 
-  // The app is designed so that ingredients work sort of like tags to a post, and are created when creating a new recipe. 
-  // Due to this, the recipe create method has to create or find the ingredient, then 
+  //create checks if the data sent to server has an ingredients array. If it does, create expects every array element passed to be an Ingredient object with an id and uses this id to create a recipe-id association.
   create(req, res) {
     
     const data = req.body.recipe
@@ -24,13 +23,18 @@ module.exports = {
       .create(data)
       .then(async recipe => {
         if(ingredientData){
+          let error
          await asyncForEach(ingredientData, async e => {
-            await Ingredient.findOrCreate({ where: {name: e.name}}).spread((result,created) =>{
-                return recipe.addIngredient(result, { through: {val:e.val, scale: e.scale} })
-              })
+           if(e.id){
+             const result = await recipe.addIngredient(e.id, { through: {val:e.val, scale: e.scale} })
+           } else {
+             error = new Error('invalid ingredient object')
+           }
+            console.log("this is the many to many result", result)
             })
           }
-          return recipe
+
+          return !error? recipe: error
       })
       .then(recipe => Recipe.find({where: {id: recipe.id}, include: [Ingredient]}))
       .then(recipe => res.status(201).send(recipe))
