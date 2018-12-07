@@ -40,8 +40,10 @@ Backend repo: https://github.com/RasyadiAbdoellah/mealprep-frontend
 - As a user I want to share recipes with other users
 
 
-### ERD + Wireframes
+### ERD
 
+![Entity Relationship]
+(https://imgur.com/B4OTHFL)
 
 ### Dev log
 
