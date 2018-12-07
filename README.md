@@ -9,7 +9,7 @@ A login and registration feature may be implemented in future iterations. This o
 
 This is the backend for MealPrepper.
 
-Backend repo: https://github.com/RasyadiAbdoellah/mealprep-frontend
+Frontend repo: https://github.com/RasyadiAbdoellah/mealprep-frontend
 
 ## Tech Stack
 - React frontend
