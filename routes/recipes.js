@@ -3,10 +3,10 @@ const router = express.Router();
 const recipesController = require('../server/controllers').recipesController
 
 
-router.post('/', recipesController.create)
+router.post('/', recipesController.asyncCreate)
 router.get('/', recipesController.readAll)
 router.get('/:id', recipesController.readOne)
-router.patch('/:id', recipesController.update)
+router.patch('/:id', recipesController.asyncUpdate)
 router.delete('/:id', recipesController.destroy)
 
 module.exports = router;

@@ -35,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
     Recipe.belongsToMany(models.Ingredient, {
       onDelete: 'CASCADE', 
-      through: 'RecipeIngredients'
+      through: models.RecipeIngredients
     })
   };
   return Recipe;

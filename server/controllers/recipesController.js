@@ -3,52 +3,26 @@ const Ingredient = require('../models').Ingredient
 const RecipeIngredients = require('../models').RecipeIngredients
 const sequelize = require('../models').sequelize
 
-async function asyncForEach(array, callback) {
-   for(let i = 0; i<array.length; i++){
-     await callback(array[i], i, array)
-   }
+function simplifyRecipe(Recipe){
+    Recipe.Ingredients.forEach(e => {
+    const flat = Object.assign(e, e.RecipeIngredients)
+    delete flat.RecipeIngredients
+    e = flat
+  })
+  return Recipe
 }
+
 
 module.exports = {
 
+  //create has been replaced with asyncCreate for now. Will need testing
   create(req, res) {
-    /*
-    What I want to happen: 
-     1. create or find all the corresponding ingredient instances.
-     2. Add the quantity value and scale to the corresponding ingredient instance
-     3. create recipe
-     4. associate the ingredient instance and set the val and scale attributes on RecipeIngredients join table.
-     5. return the recipe and its associations.
-
-     notes: a recipe has to have an ingredient
-
-     a recipe object = Recipe:{
-      name: required ,
-      details,
-      day,
-      week,
-      month,
-      Ingredients: [
-        {
-          name: required -unique,
-          val,
-          scale,
-        }
-      ]
-
-     }
-    */
-
     const data = req.body.Recipe
-    
-    //1. find or creates all ingredient instances found in data.Ingredients array. The first part of the function bulkCreates any new ingredients.
+    //bulkCreates any new ingredients.
     Ingredient.bulkCreate(
       data.Ingredients,
-      {
-        fields:['name'],
-        ignoreDuplicates:true,
-      }
-      )
+      { fields:['name'], ignoreDuplicates:true}
+    )
     // map a new array of promises that resolve to an object with the ingredient id, quantity value, and scale  
     const ingredientData = data.Ingredients.map((ingredient, index, array) => {
       return Ingredient.find({where: {name: ingredient.name}}).then(instance => {
@@ -60,14 +34,12 @@ module.exports = {
           }
         })
       })
-
     //persistedRecipe is assigned the recipe object once it's created
     //This is done just so that we have access to it outside the promise chain
     let persistedRecipe
     
     return Promise.all(ingredientData)
       .then(ingredientValues => {
-
         //initialize a transaction so that the below methods to DB happen together
         return sequelize.transaction((t) => {
           return Recipe
@@ -97,7 +69,71 @@ module.exports = {
       })
   },
 
+  async asyncCreate(req, res) {
+    /*
+    What I want to happen: 
+     1. create or find all the corresponding ingredient instances.
+     2. Add the quantity value and scale to the corresponding ingredient instance
+     3. create recipe
+     4. associate the ingredient instance and set the val and scale attributes on RecipeIngredients join table.
+     5. return the recipe and its associations.
 
+     notes: a recipe has to have an ingredient
+
+     a recipe object = Recipe:{
+      name: required ,
+      details,
+      day,
+      week,
+      month,
+      Ingredients: [
+        {
+          name: required -unique,
+          val,
+          scale,
+        }
+      ]
+
+     }
+    */
+   
+   try{
+     const data = req.body.Recipe
+     const {Ingredients} = data
+     const recipe = await Recipe.create(data)
+     let ingredients = Ingredients.map( e => {
+       return Ingredient.findOrCreate({where: {name: e.name}}).spread((ingredient, created) => {
+         return { id: ingredient.id, val: e.val, scale: e.scale}
+       })
+     })
+     //resassign ingredients to the value of the promise array
+     ingredients = await Promise.all(ingredients).then(values => values)
+ 
+     const association = ingredients.map(e => {
+       return recipe.addIngredient(e.id, {through: {val: e.val, scale: e.scale}})
+     })
+     
+     //wait till the associations are created
+     await Promise.all(association)
+     //reload with new relationshps
+     await recipe.reload({
+       include: [
+         {model: Ingredient, attributes:['id', 'name', 'typeOf'],
+           through:{
+             attributes: ['val', 'scale']
+           }
+         }]
+     })
+     
+     const simplified = simplifyRecipe(recipe.get({plain: true}))
+     
+     res.status(200).send(simplified)
+   }
+   catch(error){
+     res.status(400).send(error)
+   }
+    
+  },
 
   readAll(req, res) {
     /* 
@@ -119,6 +155,10 @@ module.exports = {
           }
         ]
       })
+      .then(recipes => recipes.map(el => {
+        const simplified = simplifyRecipe(el.get({plain: true}))
+        return simplified
+      }))
       .then(recipes => res.status(200).send(recipes))
       .catch(error => res.status(400).send(error))
   },
@@ -139,7 +179,8 @@ module.exports = {
     })
     .then(recipe => {
       if (recipe){
-        return recipe
+        const simplified = simplifyRecipe(recipe.get({plain: true}))
+        return simplified
       }
       else {
         throw new Error('no recipe found')
@@ -149,30 +190,28 @@ module.exports = {
     .catch(error => res.status(400).send(error))
   },
 
-  update(req, res){
-    
+  async asyncUpdate(req, res){ 
     const data = req.body.recipe
-
-    const ingredientData = data.Ingredients
-
+    const {Ingredients} = data
+    let ingredients
     return Recipe
     .findById(req.params.id, {include: [Ingredient]})
     .then(async recipe => {
-      console.log('top of then')
       if(recipe){
         const recipeInstance = recipe.get({plain: true})
 
         console.log('first if')
-          if( !ingredientData || ingredientData.length === 0){
+          if( !Ingredients || Ingredients.length === 0){
             console.log('in if no array')
             await recipe.setIngredients([])
-          } else if (ingredientData.length >= recipeInstance.Ingredients.length){
+          } else if (
+            (Ingredients.length !== recipeInstance.Ingredients.length) &&
+            (Ingredients.length !== 0 )
+          ){
             console.log('in else')
-            await asyncForEach(ingredientData, e => {
-              Ingredient.findOrCreate({ where: {name: e.name}}).spread((result,created) =>{
-                  return recipe.addIngredient(result, { through: {val:e.val, scale: e.scale} })
-                })
-              })
+            const associations = Ingredients.map(e => recipeInstance.addIngredients(e.id))
+
+            await Promise.all(associations)
           } else {
             
           }
