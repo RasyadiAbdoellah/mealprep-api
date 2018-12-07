@@ -77,23 +77,10 @@ module.exports = {
               const associations = ingredientValues.map(ingredient => {
                   return recipe.addIngredient(ingredient.id, {through: {val: ingredient.val, scale: ingredient.scale}, transaction: t})
               })
-              //
+              // not too sure why it has to return a promise.all, but my best guess is since transactions require a promise chain to be returned, not returning a promise commits the transaction after the first query.
               return Promise.all(associations)
             })
         })
-        
-        //line below should evaluate into a Promise.all of association promises
-        // return Promise.all(ingredientData).then(values => {
-
-        //   // the .map below creates an array of promises that resolve when an ingredient is successfully added to the join table.
-        //   let assocPromise = values.map( obj => {
-        //     console.log('in assocPromise map')
-        //     return recipe.addIngredient(obj.id, {through: { val: obj.val, scale: obj.scale}})})
-
-        //   //return the above array wrapped in a Promise.all so we can chain a .then
-
-        //   return Promise.all(assocPromise)
-        // })
       })
       .then(() => Recipe.find({where: {id: persistedRecipe.id}, include: [
         {
@@ -106,7 +93,6 @@ module.exports = {
       ]}))
       .then(recipe => res.status(201).send(recipe))
       .catch(error => {
-        console.log(error)
         res.status(400).send(error)
       })
   },
