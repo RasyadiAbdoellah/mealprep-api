@@ -135,6 +135,8 @@ module.exports = {
     
   },
 
+
+
   readAll(req, res) {
     /* 
     Due to the nature of the DB design, quantity value and scale are RecipeIngredient objects inside an Ingredient object.
