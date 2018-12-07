@@ -46,6 +46,12 @@ Frontend repo: https://github.com/RasyadiAbdoellah/mealprep-frontend
 
 ### Dev log
 
+Sequelize is hard. I didn't think I'd have this much trouble getting things to work. The docs are not as detailed as I had hoped, and so progress has been slow because there's a lot of googling and trial-and-error involved.
+
+
+Finally got the create Recipe route to work. I might be getting ahead of myself though. Would it be better to build the User table first?
+
+
 
 ### Technical issues/improvements
 
