@@ -1,6 +1,7 @@
 const Recipe = require('../models').Recipe
 const Ingredient = require('../models').Ingredient
 const RecipeIngredients = require('../models').RecipeIngredients
+const sequelize = require('../models').sequelize
 
 async function asyncForEach(array, callback) {
    for(let i = 0; i<array.length; i++){
@@ -18,51 +19,99 @@ module.exports = {
      3. create recipe
      4. associate the ingredient instance and set the val and scale attributes on RecipeIngredients join table.
      5. return the recipe and its associations.
+
+     notes: a recipe has to have an ingredient
+
+     a recipe object = Recipe:{
+      name: required ,
+      details,
+      day,
+      week,
+      month,
+      Ingredients: [
+        {
+          name: required -unique,
+          val,
+          scale,
+        }
+      ]
+
+     }
     */
-    
+
     const data = req.body.Recipe
-    if(data.day < 1 || data.day >31) {
-      data.day = null
-    }
-
-    //find or creates all ingredient instances found in data.Ingredients array.
-      //the req array elements are objects with name, typeOf, quantity value, and scale keys.
-    const ingredientData = data.Ingredients.map((ingredient, index, array) => Ingredient.findOrCreate({where: {name: ingredient.name}}).spread((instance, created) => {
-      //return the found/created instance, and tack on the quantity scale and val.
-      return {
-        instance,
-        val: ingredient.val,
-        scale: ingredient.scale
+    
+    //1. find or creates all ingredient instances found in data.Ingredients array. The first part of the function bulkCreates any new ingredients.
+    Ingredient.bulkCreate(
+      data.Ingredients,
+      {
+        fields:['name'],
+        ignoreDuplicates:true,
       }
-    }))
-
-    //not sure if below will be neccessary.
-    const quantities = data.Ingredients.map(ingredient => ingredient.quantity)
+      )
+    // map a new array of promises that resolve to an object with the ingredient id, quantity value, and scale  
+    const ingredientData = data.Ingredients.map((ingredient, index, array) => {
+      return Ingredient.find({where: {name: ingredient.name}}).then(instance => {
+      //return the found/created instance, and tack on the quantity scale and val.
+        return {
+          id: instance.id,
+          val: ingredient.val,
+          scale: ingredient.scale
+          }
+        })
+      })
 
     //persistedRecipe is assigned the recipe object once it's created
     //This is done just so that we have access to it outside the promise chain
     let persistedRecipe
+    
+    return Promise.all(ingredientData)
+      .then(ingredientValues => {
 
-    return Recipe
-      .create(data)
-      .then(recipe => {
-        // assign recipe instance to the variable above so that we have access to it outside this local scope.
-        persistedRecipe = recipe
+        //initialize a transaction so that the below methods to DB happen together
+        return sequelize.transaction((t) => {
+          return Recipe
+            .create(data, {transaction: t})
+            .then(recipe => {
+              persistedRecipe = recipe
+              const associations = ingredientValues.map(ingredient => {
+                  return recipe.addIngredient(ingredient.id, {through: {val: ingredient.val, scale: ingredient.scale}, transaction: t})
+              })
+              //
+              return Promise.all(associations)
+            })
+        })
         
         //line below should evaluate into a Promise.all of association promises
-        return Promise.all(ingredientData).then(values => {
+        // return Promise.all(ingredientData).then(values => {
 
-          // the .map below creates an array of promises that resolve when an ingredient is successfully added to the join table.
-          let assocPromise = values.map((obj, i, arr )=> recipe.addIngredient(obj.id, {through: { val: obj.val, scale: obj.scale}}))
+        //   // the .map below creates an array of promises that resolve when an ingredient is successfully added to the join table.
+        //   let assocPromise = values.map( obj => {
+        //     console.log('in assocPromise map')
+        //     return recipe.addIngredient(obj.id, {through: { val: obj.val, scale: obj.scale}})})
 
-          //return the above array wrapped in a Promise.all so we can chain a .then
-          return Promise.all(assocPromise)
-        })
+        //   //return the above array wrapped in a Promise.all so we can chain a .then
+
+        //   return Promise.all(assocPromise)
+        // })
       })
-      .then(() => Recipe.find({where: {id: persistedRecipe.id}, include: [Ingredient]}))
+      .then(() => Recipe.find({where: {id: persistedRecipe.id}, include: [
+        {
+          model: Ingredient,
+          attributes:['id', 'name', 'typeOf'],
+          through:{
+            attributes: ['val', 'scale']
+          }
+        }
+      ]}))
       .then(recipe => res.status(201).send(recipe))
-      .catch(error => res.status(400).send(error))
+      .catch(error => {
+        console.log(error)
+        res.status(400).send(error)
+      })
   },
+
+
 
   readAll(req, res) {
     /* 
@@ -118,10 +167,6 @@ module.exports = {
     
     const data = req.body.recipe
 
-    if(data.day && (data.day < 1 || data.day >31)) {
-      data.day = null
-    }
-    
     const ingredientData = data.Ingredients
 
     return Recipe

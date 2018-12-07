@@ -3,7 +3,8 @@ module.exports = (sequelize, DataTypes) => {
   const Ingredient = sequelize.define('Ingredient', {
     name: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      unique: true
     },
     typeOf: {
       type: DataTypes.ENUM,
