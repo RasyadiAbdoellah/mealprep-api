@@ -42,7 +42,7 @@ Backend repo: https://github.com/RasyadiAbdoellah/mealprep-frontend
 
 ### ERD
 
-![Entity Relationship]
+[Entity Relationship]
 (https://i.imgur.com/B4OTHFL.png)
 
 ### Dev log
