@@ -192,7 +192,46 @@ module.exports = {
 			.catch(error => res.status(400).send(error))
 	},
 
+	test(req, res){
+		let modifiedIngredients
+		Recipe.findById(req.params.id, { include: [Ingredient]})
+			.then( async recipe => {
+				const data = req.body.Recipe
+				recipe.update(data)
+				modifiedIngredients = data.Ingredients
+				modifiedIngredients = modifiedIngredients.map( e =>{
+					return Ingredient.findOrCreate({where: {name: e.name}}).spread((ingredient, created) => {
+						return {
+							id: ingredient.id,
+							val: e.val,
+							scale: e.scale
+						}
+					})
+				})
+				modifiedIngredients = await Promise.all(modifiedIngredients).then(values=>values)
+				console.log(modifiedIngredients)
+				await recipe.setIngredients([])
+				let associate = modifiedIngredients.map( e => {
+					return recipe.addIngredient(e.id, {through: {val: e.val, scale: e.scale}})
+				})
+
+				await Promise.all(associate)
+
+				await recipe.reload({
+					include: [
+						{model: Ingredient, attributes:['id', 'name', 'typeOf'],
+							through:{
+								attributes: ['val', 'scale']
+							}
+						}]
+				})
+				res.status(201).send(recipe)
+			})
+	},
+
 	async asyncUpdate(req, res){ 
+		//find the recipe by id
+		// 
 		const data = req.body.recipe
 		const {Ingredients} = data
 		let ingredients
