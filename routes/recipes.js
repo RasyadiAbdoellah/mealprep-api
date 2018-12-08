@@ -7,6 +7,6 @@ router.post('/', recipesController.asyncCreate)
 router.get('/', recipesController.readAll)
 router.get('/:id', recipesController.readOne)
 router.patch('/:id', recipesController.asyncUpdate)
-router.delete('/:id', recipesController.destroy)
+router.delete('/:id', recipesController.asyncDestroy)
 
 module.exports = router;
