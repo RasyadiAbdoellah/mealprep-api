@@ -161,9 +161,8 @@ module.exports = {
 			)
 			const data = req.body.Recipe
 
-			let modifiedIngredients, originalIngredients
-			originalIngredients = simplifyRecipe(recipe).Ingredients
-			modifiedIngredients = await getIngredientInstances(data.Ingredients)
+			const originalIngredients = simplifyRecipe(recipe).Ingredients
+			const modifiedIngredients = await getIngredientInstances(data.Ingredients)
 			
 			await recipe.update(data)
 
