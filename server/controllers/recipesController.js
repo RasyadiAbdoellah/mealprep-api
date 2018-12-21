@@ -1,7 +1,7 @@
 const Recipe = require('../models').Recipe
 const Ingredient = require('../models').Ingredient
 // const RecipeIngredients = require('../models').RecipeIngredients
-const sequelize = require('../models').sequelize
+// const sequelize = require('../models').sequelize //will need this to use transactions
 const diff = require('lodash').differenceWith
 const isEq = require('lodash').isEqual
 
@@ -25,7 +25,7 @@ function getIngredientInstances(ingredientReqArray) {
 // getIngredientInstances receives an array of ingredient names and maps promises that resolve to retrieved or created Ingredient instances. 
 // function returns a promise that resolves into an array of retrieved/created ingredient id, and request's original ingredint quantity value and scale.
 	const ingredients = ingredientReqArray.map( e => {
-		return Ingredient.findOrCreate({where: {name: e.name}}).spread((ingredient, created) => {
+		return Ingredient.findOrCreate({where: {name: e.name}}).spread((ingredient) => {
 			return { id: ingredient.id, val: e.val, scale: e.scale}
 		})
 	})
