@@ -24,6 +24,7 @@ function simplifyRecipe(RecipeInstance){
 function getIngredientInstances(ingredientReqArray) {
 // getIngredientInstances receives an array of ingredient names and maps promises that resolve to retrieved or created Ingredient instances. 
 // function returns a promise that resolves into an array of retrieved/created ingredient id, and request's original ingredint quantity value and scale.
+// It returns a promise so that the async create and update methods can call it with await.
 	const ingredients = ingredientReqArray.map( e => {
 		return Ingredient.findOrCreate({where: {name: e.name}}).spread((ingredient) => {
 			return { id: ingredient.id, val: e.val, scale: e.scale}
@@ -34,6 +35,8 @@ function getIngredientInstances(ingredientReqArray) {
 }
 
 function ingredientAssociations(toAdd, toRemove, recipeInstance){
+// ingredientAssociations takes an array of ingredient ids to add and to remove, and the recipe instance these ingredients will be associated/disassociated with.
+// the function returns a promise array of promise arrays. It's done this way to so that the function can be called with await and ensures all DB queries will run in order.
 	const remove = toRemove.map( e => {
 		return recipeInstance.removeIngredient(e.id)
 	})	
