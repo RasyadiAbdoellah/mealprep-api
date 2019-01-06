@@ -79,11 +79,11 @@ module.exports = {
    
 		try{
 			const data = req.body.Recipe
-			const recipe = await Recipe.create(data)
 			const ingredients = await getIngredientInstances(data.Ingredients)
-			
+			const recipe = await Recipe.create(data)
+
 			await ingredientAssociations(ingredients, [], recipe)
-	
+			
 			//reload with new relationshps
 			await recipe.reload({
 				include: [{
@@ -162,6 +162,10 @@ module.exports = {
 				}]
 			}
 			)
+			if (!recipe){
+				throw Error('no recipe found')
+			}
+
 			const data = req.body.Recipe
 
 			const originalIngredients = simplifyRecipe(recipe).Ingredients
