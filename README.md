@@ -66,7 +66,7 @@ Either way, the main challenge would probably be figuring out how to properly st
 
 **Feb 2 2019**
 
-After further research, it seems that Auth0 has provided an auth strategy for use with Passport.js. I think I'll be going this route.
+After further research, it seems that Auth0 has provided an auth strategy for use with Passport.js. However, Auth0 + Passport is for apps with server-side rendering. If I go with Auth0, having a SPA+API combo will require configs on both frontend React and backend Express.
 
 ### Technical issues/improvements/considerations
 
