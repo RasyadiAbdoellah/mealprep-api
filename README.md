@@ -60,10 +60,19 @@ Lot of milestones reached since this readme has been updated. Successfully creat
 
 Also, this app is now operational on Heroku! Setting up Heroku should have been done before even starting this app, but it's a big milestone nonetheless.
 
-### Technical issues/improvements/considerations
-
-**Feb 1 2019**
 User login and owned recipes is the next technical improvement goal. Passport.js seems to be the framework with the best support, but Auth0 essentially allows you to outsource the auth process. In terms of speed of development Auth0 looks to be faster, but the level of control provided by Passport.js is really attractive.
 
 Either way, the main challenge would probably be figuring out how to properly store ownership in the data. Using Passport.js as opposed to Auth0 would provide the ability to tie Recipe with User via a Foreign Key since user data will be stored locally, but is that the best way of doing it considering Passport.js also provides user data in the request via req.user? Considering Auth0 takes away user management responsibilities, would it be the safer option?
+
+**Feb 2 2019**
+
+After further research, it seems that Auth0 has provided an auth strategy for use with Passport.js. I think I'll be going this route.
+
+### Technical issues/improvements/considerations
+
+**Feb 1 2019**
+User Login To-dos
+- research auth patterns and auth packages
+- decide on what to use: Passport.js, Auth0, others
+- read docs
 
