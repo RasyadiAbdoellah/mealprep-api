@@ -11,6 +11,8 @@ This is the backend for MealPrepper.
 
 Frontend repo: https://github.com/RasyadiAbdoellah/mealprep-frontend
 
+Deployed Heroku App: https://stark-beach-91865.herokuapp.com/
+
 ## Tech Stack
 - React frontend
 - Express and Sequelize backend
@@ -52,8 +54,16 @@ Sequelize is hard. I didn't think I'd have this much trouble getting things to w
 Finally got the create Recipe route to work. I might be getting ahead of myself though. Would it be better to build the User table first?
 
 
+**Feb 1 2019**
 
-### Technical issues/improvements
+Lot of milestones reached since this readme has been updated. Successfully created a RecipeIngredient join table stores ingredient quantities for recipes, as well as proper data handling logic for Recipe CRUD. Ingredients are analagous to tags of a blog post, so blog projects using Sequelize were very helpful getting a better understanding.
 
+Also, this app is now operational on Heroku! Setting up Heroku should have been done before even starting this app, but it's a big milestone nonetheless.
 
+### Technical issues/improvements/considerations
+
+**Feb 1 2019**
+User login and owned recipes is the next technical improvement goal. Passport.js seems to be the framework with the best support, but Auth0 essentially allows you to outsource the auth process. In terms of speed of development Auth0 looks to be faster, but the level of control provided by Passport.js is really attractive.
+
+Either way, the main challenge would probably be figuring out how to properly store ownership in the data. Using Passport.js as opposed to Auth0 would provide the ability to tie Recipe with User via a Foreign Key since user data will be stored locally, but is that the best way of doing it considering Passport.js also provides user data in the request via req.user? Considering Auth0 takes away user management responsibilities, would it be the safer option?
 
