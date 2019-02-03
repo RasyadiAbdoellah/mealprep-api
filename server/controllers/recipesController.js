@@ -81,7 +81,6 @@ module.exports = {
 			const data = req.body.Recipe
 			const ingredients = await getIngredientInstances(data.Ingredients)
 			const recipe = await Recipe.create(data)
-
 			await ingredientAssociations(ingredients, [], recipe)
 			
 			//reload with new relationshps

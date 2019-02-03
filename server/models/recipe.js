@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
 				notEmpty: true
 			}
 		},
-		details: DataTypes.STRING,
+		details: DataTypes.TEXT,
 		day: {
 			type: DataTypes.INTEGER,
 			defaultValue: 0,
