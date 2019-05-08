@@ -51,6 +51,6 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use('/', indexRouter)
 app.use('/users', usersRouter)
 app.use('/ingredients', ingredientsRouter)
-app.use('/recipes', checkJwt, checkAccess, recipeRouter)
+app.use('/recipes', checkJwt, recipeRouter)
 
 module.exports = app
