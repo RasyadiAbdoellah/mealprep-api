@@ -101,7 +101,7 @@ module.exports = {
 			})
 			res.status(200).send(simplifyRecipe(recipe))
 		} catch (error) {
-			res.status(400).send(error.toString())
+			res.send(error)
 		}
 	},
 
@@ -111,7 +111,7 @@ module.exports = {
     This is because the values are stored on the join table.
     */
 
-		return Recipe.all({
+		return Recipe.findAll({
 			include: [
 				{
 					model: Ingredient,
@@ -129,11 +129,14 @@ module.exports = {
 				}),
 			)
 			.then(recipes => res.status(200).send(recipes))
-			.catch(error => res.status(400).send(error.toString()))
+			.catch(error => {
+				console.log(error)
+				return res.send(error)
+			})
 	},
 
 	readOne(req, res) {
-		return Recipe.findById(req.params.id, {
+		return Recipe.findByPk(req.params.id, {
 			include: [
 				{
 					model: Ingredient,
@@ -152,12 +155,12 @@ module.exports = {
 				}
 			})
 			.then(recipe => res.status(200).send(recipe))
-			.catch(error => res.status(400).send(error))
+			.catch(error => res.send(error))
 	},
 
 	async update(req, res) {
 		try {
-			const recipe = await Recipe.findById(req.params.id, {
+			const recipe = await Recipe.findByPk(req.params.id, {
 				include: [
 					{
 						model: Ingredient,
@@ -209,14 +212,15 @@ module.exports = {
 			})
 			res.status(201).send(simplifyRecipe(recipe))
 		} catch (error) {
-			res.status(400).send(error.toString())
+			console.log(error)
+			res.send(error)
 		}
 	},
 
 	async destroy(req, res) {
 		try {
 			//find recipe by id
-			const recipe = await Recipe.findById(req.params.id, {
+			const recipe = await Recipe.findByPk(req.params.id, {
 				include: [Ingredient],
 			})
 			//map ingredient ids to new array
@@ -229,7 +233,7 @@ module.exports = {
 			res.status(201).send()
 		} catch (error) {
 			//create more robust error reporting later
-			res.status(400).send(error)
+			res.send(error)
 		}
 	},
 }
